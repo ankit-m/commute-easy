@@ -1,0 +1,17 @@
+/*.route-purchase {
+  position: absolute;
+  right: 0;
+}
+
+.route-list-item {
+  position: relative;
+}*/
+
+.ticket {
+  max-width: 420px;
+  margin: 0 auto;
+  margin-top: 20px;
+  text-align: center;
+  border: 1px solid #f0f0f0;
+  border-radius: 3px;
+}

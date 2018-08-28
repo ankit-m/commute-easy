@@ -1,0 +1,64 @@
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="/">
+    <i class="fas fa-bezier-curve mx-3"></i>CommuteEasy
+  </a>
+  <div class="dropdown">
+    <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Test User
+    </button>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" href="/purchases">Purchases</a>
+      <a class="dropdown-item" href="#">Profile</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">Sign out</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h1 class="h1">Purchases</h1>
+
+  <ul class="list-group mt-4 purchase-list">
+    <% purchases.forEach(function (purchase) { %>
+      <li class="list-group-item route-list-item">
+        <div class="row">
+          <div class="col-md-9 p-2">
+            <a href="/purchases/<%= purchase.id %>"><%= purchase.friendly %></a>
+            <% if (purchase.claimed) { %>
+              <span class="badge badge-warning ml-2"><%= purchase.status.toUpperCase() %></span>
+            <% } else { %>
+              <span class="badge badge-info ml-2"><%= purchase.status.toUpperCase() %></span>
+            <% } %>
+          </div>
+          <div class="col-md-3 text-right">
+            <span class="d-inline-block text-dark font-weight-bold mr-2 mt-2">
+              <i class="fas fa-rupee-sign"></i>
+              <%= purchase.amount/100 %> 
+            </span>
+
+            <% if (purchase.claimed !== true) { %>
+              <button class="cancel btn btn-danger" data-id="<%= purchase.id %>">
+                Cancel
+              </button>
+            <% } %>
+          </div>
+        </div>
+      </li>
+    <% }); %>
+  </ul>
+</div>
+
+<script type="text/javascript">
+document.getElementsByClassName('purchase-list')[0].onclick = function (e) {
+  if (e.target.className !== 'cancel btn btn-danger') {
+    return;
+  }
+  fetch ('/api/purchases/' + e.target.getAttribute('data-id'), { method: 'DELETE' })
+    .then(function () {
+      window.location.reload();
+    })
+    .catch(function (e) {
+      console.log(e);
+    });
+};
+</script>

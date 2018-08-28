@@ -1,0 +1,155 @@
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="/">
+    <i class="fas fa-bezier-curve mx-3"></i>CommuteEasy
+  </a>
+  <div class="dropdown">
+    <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Test User
+    </button>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" href="/purchases">Purchases</a>
+      <a class="dropdown-item" href="#">Profile</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">Sign out</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h1 class="h1">Routes</h1>
+  <span><b>Source</b>: <%= source %></span>
+  <br />
+  <span><b>Destination</b>: <%= destination %></span>
+
+  <p class="my-4">
+    Following is a list of all available routes. Purchase a ticket for a route -
+  </p>
+  <ul class="list-group mt-4 route-list">
+    <% routes.forEach(function (route) { %>
+      <li class="list-group-item route-list-item">
+        <div class="row">
+          <div class="col-md-9">
+            <div class="route-overview my-2">
+              <i class="fas fa-location-arrow mx-2 text-primary"></i>
+              <i class="fas fa-arrow-right mx-2"></i>
+
+              <% route.legs.forEach(function (leg, i) { %>
+                <% if (leg.type === "bus") { %>
+                  <i class="fas fa-bus mx-2"></i> Bus
+                <% } %>
+
+                <% if (leg.type === "train") { %>
+                  <i class="fas fa-train mx-2"></i> Train
+                <% } %>
+
+                <% if (leg.type === "metro") { %>
+                  <i class="fas fa-subway mx-2"></i> Metro
+                <% } %>
+
+                <% if (leg.type === "taxi" || leg.type === "auto") { %>
+                  <i class="fas fa-car mx-2"></i> Taxi/Auto
+                <% } %>
+
+                <i class="fas fa-arrow-right mx-2"></i>
+              <% }); %>
+
+              <i class="fas fa-map-marker-alt mx-2 text-success"></i>
+            </div>
+          </div>
+          <div class="col-md-3 text-right">
+            <span class="text-dark font-weight-bold mr-2">
+              <i class="fas fa-rupee-sign"></i>
+              <%= route.cost/100 %> 
+            </span>
+            <button
+              data-amount="<%= route.cost %>"
+              data-source="<%= route.source %>"
+              data-destination="<%= route.destination %>"
+              data-route-id="<%= route.id %>"
+              class="purchase btn btn-success"
+            >
+              Purchase
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <% route.legs.forEach(function (leg, i) { %>
+            <div class="my-3">
+              <% if (leg.type === "bus") { %>
+                <i class="text-secondary fas fa-bus mx-2"></i>
+              <% } %>
+
+              <% if (leg.type === "train") { %>
+                <i class="text-secondary fas fa-train mx-2"></i>
+              <% } %>
+
+              <% if (leg.type === "metro") { %>
+                <i class="text-secondary fas fa-subway mx-2"></i>
+              <% } %>
+
+              <% if (leg.type === "taxi" || leg.type === "auto") { %>
+                <i class="text-secondary fas fa-car mx-2"></i>
+              <% } %>
+
+              <span class="text-secondary"><%= leg.source %></span>
+              <i class="text-secondary fas fa-arrow-right mx-2"></i>
+              <span class="text-secondary"><%= leg.destination %></span>
+              <span class="ml-2 badge badge-dark"><i class="fas fa-rupee-sign"></i> <%= leg.cost/100 %></span>
+            </div>
+          <% }); %>
+        </div>
+      </li>
+    <% }); %>
+  </ul>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+
+document.getElementsByClassName('route-list')[0].onclick = function (e) {
+    if (e.target.className !== 'purchase btn btn-success') {
+      return;
+    }
+
+    var options = {
+      "key": "rzp_test_J7BspkRRJYr1pU",
+      "amount": e.target.getAttribute('data-amount'),
+      "name": "CommuteEasy",
+      "description": e.target.getAttribute('data-source') + ' to ' + e.target.getAttribute('data-destination'),
+      "handler": function (response) {
+        fetch ('/api/purchases', {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          redirect: "follow",
+          body: JSON.stringify({
+            token: response.razorpay_payment_id,
+            source: e.target.getAttribute('data-source'),
+            destination: e.target.getAttribute('data-destination'),
+            routeId: e.target.getAttribute('data-route-id')
+          })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (r) {
+            console.log(r);
+            window.location.href = '/purchases/' + r.id;
+          });
+      },
+      prefill: {
+        contact: 98765430,
+        email: 'user@test.com'
+      },
+      "theme": {
+        "color": "#F37254"
+      }
+    };
+
+    var rzp1 = new Razorpay(options);
+
+
+    rzp1.open();
+    e.preventDefault();
+}
+</script>
